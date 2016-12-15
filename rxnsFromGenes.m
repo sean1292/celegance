@@ -15,56 +15,57 @@ function [commonGeneRxnsModel1, commonGeneRxnsModel2, rxnsModel1, rxnsModel2] = 
 
     rxns2 = findRxnsFromGenes(model2, genes2Not1);
 
-    rxnsBoth2Finished = fieldnames(rxnsBoth2S)
-    for  i = 1:numel(rxnsBoth2Finished)
-        gene = rxnsBoth2S.(rxnsBoth2Finished{i});
+    commonGeneRxnsModel2 = fieldnames(rxnsBoth2S)
+    for  i = 1:numel(commonGeneRxnsModel2)
+        gene = rxnsBoth2S.(commonGeneRxnsModel2{i});
         str='';
         for j = 1:size(gene,1)
             rxns(1,j) = {gene{j,1}};
         end 
         rxns = [rxns{:}];
         str = strjoin(rxns, ', ');
-        rxnsBoth2Finished(i,2) = {str};
+        commonGeneRxnsModel2(i,2) = {str};
         rxns(1,:)=[];
     end
 
-    rxnsBoth1Finished = fieldnames(rxnsBoth1S)
-    for  i = 1:numel(rxnsBoth1Finished)
-        gene = rxnsBoth1S.(rxnsBoth1Finished{i});
+    commonGeneRxnsModel1 = fieldnames(rxnsBoth1S)
+    for  i = 1:numel(commonGeneRxnsModel1)
+        gene = rxnsBoth1S.(commonGeneRxnsModel1{i});
         str='';
         for j = 1:size(gene,1)
             rxns(1,j) = {gene{j,1}};
         end 
         rxns = [rxns{:}];
         str = strjoin(rxns, ', ');
-        rxnsBoth1Finished(i,2) = {str};
+        commonGeneRxnsModel1(i,2) = {str};
         rxns(1,:)=[];
     end
 
-    rxns1Finished = fieldnames(rxns1)
-    for  i = 1:numel(rxns1Finished)
-        gene = rxns1.(rxns1Finished{i});
+    rxnsModel1 = fieldnames(rxns1)
+    for  i = 1:numel(rxnsModel1)
+        gene = rxns1.(rxnsModel1{i});
         str='';
         for j = 1:size(gene,1)
             rxns(1,j) = {gene{j,1}};
         end 
         rxns = [rxns{:}];
         str = strjoin(rxns, ', ');
-        rxns1Finished(i,2) = {str};
+        rxnsModel1(i,2) = {str};
         rxns(1,:)=[];
     end
 
-    rxns2Finished = fieldnames(rxns2)
-    for  i = 1:numel(rxns2Finished)
-        gene = rxns2.(rxns2Finished{i});
+    rxnsModel2 = fieldnames(rxns2)
+    for  i = 1:numel(rxnsModel2)
+        gene = rxns2.(rxnsModel2{i});
         str='';
         for j = 1:size(gene,1)
             rxns(1,j) = {gene{j,1}};
         end 
         rxns = [rxns{:}];
         str = strjoin(rxns, ', ');
-        rxns2Finished(i,2) = {str};
+        rxnsModel1(i,2) = {str};
         rxns(1,:)=[];
+    end
 end
 
 
