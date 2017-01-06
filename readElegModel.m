@@ -1,6 +1,5 @@
-function [eleg] = readElegModel(filename,all_mets,all_bigg)
-
-% [eleg] = readElegModel(filename,all_mets,all_bigg)
+function [eleg] = readElegModel(filename,all_mets,all_bigg,all_kegg,all_names)
+% [eleg] = readElegModel(filename,all_mets,all_bigg,all_kegg,all_names)
 % reads the icel model and converts it in the necessary format
 
 % INPUT:
@@ -9,11 +8,13 @@ function [eleg] = readElegModel(filename,all_mets,all_bigg)
 % "E:\Dropbox\Sean-Chintan\chintan\Metabolite List.xlsx"
 % all_bigg: import coloumn D of "All Metabolites (repeats too)" tab in
 % "E:\Dropbox\Sean-Chintan\chintan\Metabolite List.xlsx"
+% all_kegg: import coloumn B of "All Metabolites (repeats too)" tab in
+% "E:\Dropbox\Sean-Chintan\chintan\Metabolite List.xlsx"
+% all_names: import coloumn C of "All Metabolites (repeats too)" tab in
+% "E:\Dropbox\Sean-Chintan\chintan\Metabolite List.xlsx"
 
 % OUTPUT:
 % eleg: Kaleta model in COBRA format
-
-% COMMENTS: KEGG ids still need to be arranged
 
 eleg = readCbModel(filename);
 eleg.mets = strrep(eleg.mets,'_c[Cytosol]','[c]');
@@ -43,6 +44,18 @@ all_bigg = strrep(all_bigg,'[e]','');
 all_bigg = strrep(all_bigg,'[m]','');
 all_bigg = strrep(all_bigg,'[n]','');
 
+for i=1:length(all_kegg)
+    if isempty(all_kegg{i,1})
+        all_kegg{i,1} = ' ';
+    else
+        all_kegg{i,1} = all_kegg{i,1};
+    end
+end
+all_kegg = strrep(all_kegg,'[c]','');
+all_kegg = strrep(all_kegg,'[e]','');
+all_kegg = strrep(all_kegg,'[m]','');
+all_kegg = strrep(all_kegg,'[n]','');
+
 mets = eleg.mets;
 compartments = {'c';'e';'m';'n'};
 acc = 0;
@@ -57,9 +70,13 @@ for i=1:length(compartments)
         comp = regexp(mets(ib(j)),'[','split');
         comp = strrep(comp{1,1}{1,2},']','');
         newmets{ib(j),1} = strcat(all_bigg{ia(j),1},'[',comp,']');
+        names{ib(j),1} = all_names{ia(j),1};
+        keggid{ib(j),1} = all_kegg{ia(j),1};
     end
 end
 if ~isempty(newmets)
     eleg.oldmets = eleg.mets; eleg.mets = newmets;
     fprintf('%d metabolites out of %d accounted for.\n',acc,length(eleg.oldmets));
+    eleg.metNames = names;
+    eleg.metKEGGID = keggid;
 end
