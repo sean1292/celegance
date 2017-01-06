@@ -1,9 +1,10 @@
 function [model1,impr] = refine_merged_model(model)
 % [model1,impr] = refine_merged_model(model)
+% refines the merged model
 
 % INPUT: 
 % model: combined model obtained from following command
-% comb = mergeTwoModels(eleg,icel,'BIO0100');
+% model = mergeTwoModels(eleg,icel,'BIO0100');
 
 % OUTPUT:
 % model1: new refined model
