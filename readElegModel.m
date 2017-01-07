@@ -1,4 +1,4 @@
-function [eleg] = readElegModel(filename,all_mets,all_bigg,all_kegg,all_names)
+function [eleg] = readElegModel(filename,all_mets,all_bigg,all_kegg,all_names,all_formulas)
 % [eleg] = readElegModel(filename,all_mets,all_bigg,all_kegg,all_names)
 % reads the icel model and converts it in the necessary format
 
@@ -11,6 +11,8 @@ function [eleg] = readElegModel(filename,all_mets,all_bigg,all_kegg,all_names)
 % all_kegg: import coloumn B of "All Metabolites (repeats too)" tab in
 % "E:\Dropbox\Sean-Chintan\chintan\Metabolite List.xlsx"
 % all_names: import coloumn C of "All Metabolites (repeats too)" tab in
+% "E:\Dropbox\Sean-Chintan\chintan\Metabolite List.xlsx"
+% all_formulas: import coloumn E of "All Metabolites (repeats too)" tab in
 % "E:\Dropbox\Sean-Chintan\chintan\Metabolite List.xlsx"
 
 % OUTPUT:
@@ -56,6 +58,14 @@ all_kegg = strrep(all_kegg,'[e]','');
 all_kegg = strrep(all_kegg,'[m]','');
 all_kegg = strrep(all_kegg,'[n]','');
 
+for i=1:length(all_formulas)
+    if isempty(all_formulas{i,1})
+        all_formulas{i,1} = ' ';
+    else
+        all_formulas{i,1} = all_formulas{i,1};
+    end
+end
+
 mets = eleg.mets;
 compartments = {'c';'e';'m';'n'};
 acc = 0;
@@ -72,6 +82,7 @@ for i=1:length(compartments)
         newmets{ib(j),1} = strcat(all_bigg{ia(j),1},'[',comp,']');
         names{ib(j),1} = all_names{ia(j),1};
         keggid{ib(j),1} = all_kegg{ia(j),1};
+        formula{ib(j),1} = all_formulas{ia(j),1};
     end
 end
 if ~isempty(newmets)
@@ -79,4 +90,5 @@ if ~isempty(newmets)
     fprintf('%d metabolites out of %d accounted for.\n',acc,length(eleg.oldmets));
     eleg.metNames = names;
     eleg.metKEGGID = keggid;
+    eleg.metFormulas = formula;
 end

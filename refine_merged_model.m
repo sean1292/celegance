@@ -51,7 +51,7 @@ fprintf('\n%d unused metabolties were found and removed.\n',length(iunmets));
 r = 0; % reversibility mismatch counter
 s = 0; % stoichiometry difference counter
 d = 0; % net duplicate reaction counter
-c = 1;
+c = 1; % query reaction counter (WHILE loop)
 while c~=length(model1.rxns)
     %     fprintf('Looking for a duplicate copy of %s....\n',model1.rxns{c,1});
     k = 0; % duplicate counter
@@ -133,6 +133,13 @@ while c~=length(model1.rxns)
     end
     c = c+1;
 end
+
+% identify any duplicate metabolites
+[~,i] = unique(model1.mets);
+if ~isempty(setdiff([1:1:length(model1.mets)]',i))
+    warning('Metabolite list is not unique. There may be errors.\n');
+end
+
 impr.dup_rxns = setdiff(model.rxns,model1.rxns);
 impr.dup_rev = dup_rev;
 impr.dup_s = dup_s;

@@ -1,4 +1,4 @@
-function [icel] = readICELModel(filename,all_hrid,all_mrid,all_mets,all_bigg,all_kegg,all_names)
+function [icel] = readICELModel(filename,all_hrid,all_mrid,all_mets,all_bigg,all_kegg,all_names,all_formulas)
 % [icel] = readICELModel(filename,all_hrid,all_mrid,all_mets,all_bigg,all_kegg,all_names)
 % reads the icel model and converts it in the desired format
 
@@ -16,7 +16,8 @@ function [icel] = readICELModel(filename,all_hrid,all_mrid,all_mets,all_bigg,all
 % "E:\Dropbox\Sean-Chintan\chintan\Metabolite List.xlsx"
 % all_names: import coloumn C of "All Metabolites (repeats too)" tab in
 % "E:\Dropbox\Sean-Chintan\chintan\Metabolite List.xlsx"
-
+% all_formulas: import coloumn E of "All Metabolites (repeats too)" tab in
+% "E:\Dropbox\Sean-Chintan\chintan\Metabolite List.xlsx"
 
 % OUTPUT:
 % icel: iCEL1273 model in Cobra format
@@ -90,6 +91,14 @@ all_kegg = strrep(all_kegg,'[e]','');
 all_kegg = strrep(all_kegg,'[m]','');
 all_kegg = strrep(all_kegg,'[n]','');
 
+for i=1:length(all_formulas)
+    if isempty(all_formulas{i,1})
+        all_formulas{i,1} = ' ';
+    else
+        all_formulas{i,1} = all_formulas{i,1};
+    end
+end
+
 compartments = {'c';'e';'m'};
 % compartments = {'m'};
 acc = 0;
@@ -128,6 +137,7 @@ for i=1:length(compartments)
         newmets{ib(j),1} = strcat(all_bigg{ia(j),1},'[',comp,']');
         names{ib(j),1} = all_names{ia(j),1};
         keggid{ib(j),1} = all_kegg{ia(j),1};
+        formula{ib(j),1} = all_formulas{ia(j),1};
     end
 end
 if ~isempty(newmets)
@@ -135,5 +145,5 @@ if ~isempty(newmets)
     fprintf('%d metabolites out of %d accounted for.\n',acc,length(icel.oldmets));
     icel.metNames = names;
     icel.metKEGGID = keggid;
-    icel.metKEGGID = strrep(icel.metKEGGID,'[c]','');
+    icel.metFormulas = formula;
 end
