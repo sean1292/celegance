@@ -1,8 +1,8 @@
-function [model1,impr] = refine_merged_model(model)
+function [model1,impr,t] = refine_merged_model(model)
 % [model1,impr] = refine_merged_model(model)
 % refines the merged model
 
-% INPUT: 
+% INPUT:
 % model: combined model obtained from following command
 % model = mergeTwoModels(eleg,icel,'BIO0100');
 
@@ -10,14 +10,15 @@ function [model1,impr] = refine_merged_model(model)
 % model1: new refined model
 % impr: improvements made
 
-% COMMENTS: Does not take genes into account! Needs to be included
+% COMMENTS: Does not take genes and stoichiometry into account! Needs to be included
 
+tic
 % initialize new_model
 model1 = model;
 
 % remove any unused metabolites and remove metabolite properties that exist
 impr.unused_mets = model.mets(sum(any(model.S,3),2)==0);
-[~,~,iunmets] = intersect(model1.mets,impr.unused_mets);
+[~,iunmets] = intersect(model1.mets,impr.unused_mets);
 model1.mets(iunmets) = [];
 model1.S(iunmets,:) = [];
 % metabolite properties
@@ -45,31 +46,49 @@ end
 if isfield(model1,'metPubChemID') % metabolite PubChem
     model1.metPubChemID(iunmets) = [];
 end
-fprintf('%d unused metabolties were found and removed.\n',length(iunmets));
-
+fprintf('\n%d unused metabolties were found and removed.\n',length(iunmets));
 % find duplicate reactions
+r = 0; % reversibility mismatch counter
+s = 0; % stoichiometry difference counter
+d = 0; % net duplicate reaction counter
 c = 1;
 while c~=length(model1.rxns)
-    conmets_c = model1.mets(model1.S(:,c)<0);
-    promets_c = model1.mets(model1.S(:,c)>0);
-    fprintf('Looking for a duplicate copy of %s....\n',model1.rxns{c,1});
+    %     fprintf('Looking for a duplicate copy of %s....\n',model1.rxns{c,1});
     k = 0; % duplicate counter
     iduprxns = [];
-%     fprintf('Next loop length: %d.\n',length([c+1:1:length(model1.rxns)]));
     for i=c+1:length(model1.rxns)
-%         fprintf('Query: %d\tList: %d\n',c,i);
-        conmets_i = model1.mets(model1.S(:,i)<0);
-        promets_i = model1.mets(model1.S(:,i)>0);
-        cons_int = intersect(conmets_i,conmets_c); cons_un = union(conmets_i,conmets_c);
-        prod_int = intersect(promets_i,promets_c); prod_un = union(promets_i,promets_c);
-        if length(cons_un)==length(cons_int) && length(prod_un)==length(prod_int) && ~isempty(cons_un)
+        if sum(any(model1.S(:,i),2)==any(model1.S(:,c),2))==size(model1.S,1)
             fprintf('Another copy of %s exists at %d: %s\n',model1.rxns{c,1},i,model1.rxns{i,1});
-            X = printRxnFormula(model,model1.rxns{c,1},false);
-            fprintf('Original: %s: %s\n',model1.rxns{c,1},X{1,1});
-            X = printRxnFormula(model,model1.rxns{i,1},false);
-            fprintf('Duplicate: %s: %s\n',model1.rxns{i,1},X{1,1});
+            X1 = printRxnFormula(model1,model1.rxns{c,1},false);
+            fprintf('Original: %s: %s\n',model1.rxns{c,1},X1{1,1});
+            X2 = printRxnFormula(model1,model1.rxns{i,1},false);
+            fprintf('Duplicate: %s: %s\n',model1.rxns{i,1},X2{1,1});
             k = k+1;
             iduprxns(k,1) = i;
+            d = d+1;
+            dup_rxns{d,1} = model1.rxns{c,1}; % stores original
+            dup_rxns{d,1} = model1.rxns{i,1}; % stores duplicate
+            % check if reversibilities are similar
+            if ~isempty(strfind(X1{1,1},'<=>')) && isempty(strfind(X2{1,1},'<=>'))
+                fprintf('Duplicate reaction is irreversible.\n');
+                r = r+1;
+                dup_rev{r,1} = model1.rxns{c,1}; % stores original
+                dup_rev{r,2} = model1.rxns{i,1}; % stores duplicate
+            elseif isempty(strfind(X1{1,1},'<=>')) && ~isempty(strfind(X2{1,1},'<=>'))
+                fprintf('Duplicate reaction is reversible.\n');
+                r = r+1;
+                dup_rev{r,1} = model1.rxns{c,1}; % stores original
+                dup_rev{r,2} = model1.rxns{i,1}; % stores duplicate
+            else
+                fprintf('Reversibility matches for both.\n');
+            end
+            % check if stoichiometry is same
+            if sum(model1.S(:,c)==model1.S(:,i))~=size(model1.S,1)
+                fprintf('The stoichiometry is different for duplicate.\n');
+                s = s+1;
+                dup_s{s,1} = model1.rxns{c,1}; % stores original
+                dup_s{s,2} = model1.rxns{i,1}; % stores duplicate
+            end
         end
     end
     if k~=0
@@ -110,9 +129,12 @@ while c~=length(model1.rxns)
         if isfield(model1,'rules') % reaction rules
             model1.rules(iduprxns) = [];
         end
+        fprintf('Round %d removed %d reactions.\n',c,k);
     end
-    fprintf('Round %d removed %d reactions.\n',c,k);
     c = c+1;
 end
 impr.dup_rxns = setdiff(model.rxns,model1.rxns);
+impr.dup_rev = dup_rev;
+impr.dup_s = dup_s;
 fprintf('%d duplicate reactions were removed.\n',length(impr.dup_rxns));
+t = toc;
