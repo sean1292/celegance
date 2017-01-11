@@ -1,13 +1,38 @@
-function gene_list = getgeneinfo_KEGG(org_code,gene_entry,web_options)
+function genes = getgeneinfo_KEGG(org_code,gene_entry,web_options)
+% genes = getgeneinfo_KEGG(org_code,gene_entry,web_options)
+% gets all the info on all genes in gene_entry list from KEGG
+%
+% INPUT:
+% org_code: 3-4 letter organism code
+% gene_entry: list of genes to be querried
+% web_options: options for webread
+% 
+% OUTPUT:
+% genes: list of genes with following format
+% column1-gene entry, column2-KO, column3-gene name, and
+% column4-definition
+% 
+% Written by Chintan Joshi
 
+tic
 if nargin < 3
     web_options = weboptions('time',10);
 end
-gene_list = cell(length(gene_entry),1);
+rem_genes = {'NA';'ND';'Unknown';'TBD'};
+gene_entry(ismember(gene_entry,rem_genes)) = [];
+genes = cell(length(gene_entry),4);
 for i=1:length(gene_entry)
     A = webread(strcat('http://rest.kegg.jp/find/',org_code,'/',gene_entry{i,1}),web_options);
-    A = getallgenes_KEGG(A,org_code,false);
+    A = getallgenes_KEGG(org_code,false,A);
     A = A(strcmp(A(:,1),gene_entry{i,1}),:);
-    gene_list{i,1} = A;
+    if isempty(A)
+        genes(i,:) = repmat({' '},1,4);
+    else
+        genes(i,:) = A;
+    end
     fprintf('%d.Query: %s....\n',i,gene_entry{i,1});
 end
+
+genes(strcmp(genes(:,1),' '),:)=[];
+fprintf('%d genes found in KEGG.\n',size(genes,1));
+toc
