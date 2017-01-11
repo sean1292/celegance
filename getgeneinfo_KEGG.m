@@ -1,4 +1,4 @@
-function genes = getgeneinfo_KEGG(org_code,gene_entry,web_options)
+function [genes,genes_not_found] = getgeneinfo_KEGG(org_code,gene_entry,web_options)
 % genes = getgeneinfo_KEGG(org_code,gene_entry,web_options)
 % gets all the info on all genes in gene_entry list from KEGG
 %
@@ -14,13 +14,13 @@ function genes = getgeneinfo_KEGG(org_code,gene_entry,web_options)
 % 
 % Written by Chintan Joshi
 
-tic
 if nargin < 3
     web_options = weboptions('time',10);
 end
 rem_genes = {'NA';'ND';'Unknown';'TBD'};
 gene_entry(ismember(gene_entry,rem_genes)) = [];
 genes = cell(length(gene_entry),4);
+h = waitbar(0,'Finding genes in KEGG...');
 for i=1:length(gene_entry)
     A = webread(strcat('http://rest.kegg.jp/find/',org_code,'/',gene_entry{i,1}),web_options);
     A = getallgenes_KEGG(org_code,false,A);
@@ -30,9 +30,12 @@ for i=1:length(gene_entry)
     else
         genes(i,:) = A;
     end
-    fprintf('%d.Query: %s....\n',i,gene_entry{i,1});
+%     fprintf('%d.Query: %s....\n',i,gene_entry{i,1});
+    waitbar(i/length(gene_entry));
 end
+close(h);
 
 genes(strcmp(genes(:,1),' '),:)=[];
 fprintf('%d genes found in KEGG.\n',size(genes,1));
-toc
+genes_not_found = setdiff(gene_entry,genes(:,1));
+fprintf('%d genes not found in KEGG.\n',size(genes_not_found,1));
