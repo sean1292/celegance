@@ -1,4 +1,4 @@
-function [model1,impr,t] = refine_merged_model(modelA,modelB,obj_rxn,org_code)
+function [model_unref,impr,t] = refine_merged_model(modelA,modelB,obj_rxn,org_code)
 % [model1,impr] = refine_merged_model(model)
 % refines the merged model
 
@@ -17,12 +17,12 @@ function [model1,impr,t] = refine_merged_model(modelA,modelB,obj_rxn,org_code)
 
 tic
 % merge two models to create a preliminary model
-model = mergeTwoModels(modelA,modelB,obj_rxn);
+model_unref = mergeTwoModels(modelA,modelB,obj_rxn);
 % initialize new_model
-model1 = model;
+model1 = model_unref;
 
 % remove any unused metabolites and remove metabolite properties that exist
-impr.unused_mets = model.mets(sum(any(model.S,3),2)==0);
+impr.unused_mets = model_unref.mets(sum(any(model_unref.S,3),2)==0);
 [~,iunmets] = intersect(model1.mets,impr.unused_mets);
 model1.mets(iunmets) = [];
 model1.S(iunmets,:) = [];
@@ -60,11 +60,13 @@ c = 1; % query reaction counter (WHILE loop)
 h = waitbar(c,'Checking reactions for duplicity and reversibility....');
 while c~=length(model1.rxns)
     steps = length(model1.rxns);
+    S = model1.S;% to account for h differences..e.g. A + B -> C vs. A + B -> C + h
+    S(ismember(model1.mets,{'h[c]';'h[m]';'h[n]';'h[e]'}),:) = [];
     %     fprintf('Looking for a duplicate copy of %s....\n',model1.rxns{c,1});
     k = 0; % duplicate counter
     iduprxns = [];
     for i=c+1:length(model1.rxns)
-        if sum(any(model1.S(:,i),2)==any(model1.S(:,c),2))==size(model1.S,1)
+        if sum(any(S(:,i),2)==any(S(:,c),2))==size(S,1)
 %             fprintf('Another copy of %s exists at %d: %s\n',model1.rxns{c,1},i,model1.rxns{i,1});
             X1 = printRxnFormula(model1,model1.rxns{c,1},false);
 %             fprintf('Original: %s: %s\n',model1.rxns{c,1},X1{1,1});
@@ -90,7 +92,7 @@ while c~=length(model1.rxns)
 %                 fprintf('Reversibility matches for both.\n');
             end
             % check if stoichiometry is same
-            if sum(model1.S(:,c)==model1.S(:,i))~=size(model1.S,1)
+            if sum(S(:,c)==S(:,i))~=size(S,1)
 %                 fprintf('The stoichiometry is different for duplicate.\n');
                 s = s+1;
                 dup_s{s,1} = model1.rxns{c,1}; % stores original
@@ -142,7 +144,7 @@ while c~=length(model1.rxns)
     waitbar(c/steps);
 end
 close(h);
-fprintf('%d duplicate reactions were removed.\n',length(setdiff(model.rxns,model1.rxns)));
+fprintf('%d duplicate reactions were removed.\n',length(setdiff(model_unref.rxns,model1.rxns)));
 
 % identify any duplicate metabolites
 [~,i] = unique(model1.mets);
@@ -200,16 +202,18 @@ end
 close(h);
 fprintf('Rules have been updated.\n');
 % check if genes have been updated corectly
-[~,~,del_match] = check_gene_account(model,model1,twice_present);
+[~,~,del_match] = check_gene_account(model_unref,model1,twice_present);
 if sum(del_match==del_match)==length(del_match)
     fprintf('Genes have updated correctly and are accounted for.\n');
 else
     fprintf('Genes have not been updated correctly and are accounted for.\n');
 end
 
-impr.dup_rxns = setdiff(model.rxns,model1.rxns);
+impr.dup_rxns = setdiff(model_unref.rxns,model1.rxns);
 impr.dup_rev = dup_rev;
 impr.dup_s = dup_s;
 impr.dup_genes = twice_present;
 impr.notFound_genes = genes_not_found;
+impr.model = model1;
+
 t = toc;
