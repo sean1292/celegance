@@ -67,11 +67,11 @@ while c~=length(model1.rxns)
     iduprxns = [];
     for i=c+1:length(model1.rxns)
         if sum(any(S(:,i),2)==any(S(:,c),2))==size(S,1)
-%             fprintf('Another copy of %s exists at %d: %s\n',model1.rxns{c,1},i,model1.rxns{i,1});
+            fprintf('Another copy of %s exists at %d: %s\n',model1.rxns{c,1},i,model1.rxns{i,1});
             X1 = printRxnFormula(model1,model1.rxns{c,1},false);
-%             fprintf('Original: %s: %s\n',model1.rxns{c,1},X1{1,1});
+            fprintf('Original: %s: %s\n',model1.rxns{c,1},X1{1,1});
             X2 = printRxnFormula(model1,model1.rxns{i,1},false);
-%             fprintf('Duplicate: %s: %s\n',model1.rxns{i,1},X2{1,1});
+            fprintf('Duplicate: %s: %s\n',model1.rxns{i,1},X2{1,1});
             k = k+1;
             iduprxns(k,1) = i;
             d = d+1;
@@ -79,21 +79,21 @@ while c~=length(model1.rxns)
             dup_rxns{d,1} = model1.rxns{i,1}; % stores duplicate
             % check if reversibilities are similar
             if ~isempty(strfind(X1{1,1},'<=>')) && isempty(strfind(X2{1,1},'<=>'))
-%                 fprintf('Duplicate reaction is irreversible.\n');
+                fprintf('Duplicate reaction is irreversible.\n');
                 r = r+1;
                 dup_rev{r,1} = model1.rxns{c,1}; % stores original
                 dup_rev{r,2} = model1.rxns{i,1}; % stores duplicate
             elseif isempty(strfind(X1{1,1},'<=>')) && ~isempty(strfind(X2{1,1},'<=>'))
-%                 fprintf('Duplicate reaction is reversible.\n');
+                fprintf('Duplicate reaction is reversible.\n');
                 r = r+1;
                 dup_rev{r,1} = model1.rxns{c,1}; % stores original
                 dup_rev{r,2} = model1.rxns{i,1}; % stores duplicate
             else
-%                 fprintf('Reversibility matches for both.\n');
+                fprintf('Reversibility matches for both.\n');
             end
             % check if stoichiometry is same
             if sum(S(:,c)==S(:,i))~=size(S,1)
-%                 fprintf('The stoichiometry is different for duplicate.\n');
+                fprintf('The stoichiometry is different for duplicate.\n');
                 s = s+1;
                 dup_s{s,1} = model1.rxns{c,1}; % stores original
                 dup_s{s,2} = model1.rxns{i,1}; % stores duplicate
