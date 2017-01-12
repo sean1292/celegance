@@ -68,7 +68,7 @@ if nargin==2
     genes_col3(~ismember(genes(:,3),gene_entry),:) = [];
     fprintf('%d genes in the list have been annotated based on molecular_name.\n',size(col3,1));
     twice_present = genes_col2(ismember(genes_col2(:,2),genes_col3(:,2)),:);
-    fprintf('%d maybe duplicates or have duplicates.\n',size(twice_present,1));
+    fprintf('%d genes have duplicates.\n',size(twice_present,1));
     col2(ismember(genes_col2(:,2),genes_col3(:,2))) = [];
     genes_col2(ismember(genes_col2(:,2),genes_col3(:,2)),:) = [];
     genes = [genes_col2;genes_col3];
