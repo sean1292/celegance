@@ -1,4 +1,4 @@
-function atoms_mat = create_atom_matrix(model,mets)
+function atoms_mat = create_atom_matrix(model,mets,disp_flag)
 % atoms_mat = create_atom_matrix(model,mets)
 % creates a cell matrix which can be evaluated using eval to determine atom balancing
 % User-defined functions used:
@@ -7,6 +7,7 @@ function atoms_mat = create_atom_matrix(model,mets)
 % INPUT:
 % model: model to be used which contains the info
 % mets: list of metabolites
+% disp_flag: true, print summary; false, don't print summary
 %
 % OUTPUT:
 % atoms_mat: a cell matrix with atom numbers listed as string
@@ -17,6 +18,9 @@ if nargin < 2
     metFormulas = model.metFormulas;
 else
     metFormulas = model.metFormulas(ismember(model.mets,mets));
+end
+if nargin < 3
+    disp_flag = false;
 end
 
 elements = {'C';'Ca';'Cl';'Co';'Cu';'Fe';'H';'I';'K';'Mg';'Mo';'N';'Na';'O';'P';'R';'S';'Se';'Zn'};
@@ -53,4 +57,13 @@ for i=1:length(mets)
             atoms_mat(i,:) = strrep(atoms_mat(i,:),strcat('+*',multiplier),'');
         end
     end
+    if sum(cellfun(@isempty,atoms_mat(i,:))) == length(elements)
+        met_contain(i,1) = 0;
+    else
+        met_contain(i,1) = 1;
+    end
+end
+if disp_flag
+    fprintf('%d metabolites do not have formulas.\n',length(find(met_contain==0)));
+    fprintf('%d metabolites have formulas.\n',length(find(met_contain==1)));
 end

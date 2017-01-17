@@ -1,4 +1,16 @@
 function [charge_imb,charge] = charge_balance(model,rxns,disp_flag)
+% [charge_imb,charge] = charge_balance(model,rxns,disp_flag)
+% finds the net charge remaining on the reactions, and also a boolean-like
+% vector suggesting if the reaction was charge balanced
+
+% INPUT:
+% model: model of interest
+% rxns: list of reaction ids belonging to the model
+% disp_flag: print on command window (true)
+%
+% OUTPUT:
+% charge_imb: a boolean-like vector suggesting if the reaction was charge balanced
+% charg: the net charge remaining on the reaction
 
 if nargin < 2
     rxns = model.rxns;
