@@ -8,7 +8,7 @@ function metBiGG = getbiggChargeFormula(all_biggid, disp)
 %          Bigg 
 tic;
 metBiGG = cell(length(all_biggid),9);
-options = weboptions('Timeout',30);
+options = weboptions('Timeout',30, 'RequestMethod' , 'GET');
 
 notInbigg = 0;
 noCharge=0;
@@ -25,15 +25,7 @@ for i=1:length(all_biggid)
                 
     data= webread(strcat('http://bigg.ucsd.edu/api/v2/universal/metabolites/', all_biggid{i,1}(1:end-3)),options);
 
-    if isfield(data.database_links,'BioCyc')
-        data.database_links.BioCyc.id
-        metaCyc = webread( strcat('http://websvc.biocyc.org/getxml?id=', data.database_links.BioCyc.id), options);
-        regex = regexp(metaCyc, '<gibbs-0 datatype="float" units="kcal\/mol"\>(-?\d+\.\d+)', 'tokens');
-        if isempty(regex)~=1
-            gibbs = regex{1};
-            display(gibbs);
-        end
-    end
+    
     try
         %if not same id as previous one
 
@@ -42,12 +34,12 @@ for i=1:length(all_biggid)
             data= webread(strcat('http://bigg.ucsd.edu/api/v2/universal/metabolites/', all_biggid{i,1}(1:end-3)),options);
             
             if isfield(data.database_links,'BioCyc')
-                metaCyc = webread( data.database_links.BioCyc.link, options);
+                data.database_links.BioCyc.id
+                metaCyc = webread( strcat('http://websvc.biocyc.org/getxml?id=', data.database_links.BioCyc.id), options);
                 regex = regexp(metaCyc, '<gibbs-0 datatype="float" units="kcal\/mol"\>(-?\d+\.\d+)', 'tokens');
                 if isempty(regex)~=1
                     gibbs = regex{1};
                     display(gibbs);
-                    metBiGG{i,9} = gibbs;
                 end
             end
             
