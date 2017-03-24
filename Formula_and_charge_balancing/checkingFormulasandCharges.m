@@ -40,7 +40,9 @@ y1=0;
 z1=0;
 rxnToChange = zeros(size(model1.S,1),1);
 model1.altMetCharge = model1.metCharge;
+model1.boolMetChargeChange = zeros(size(model1.metCharge));
 model1.altMetFormulas = cell(size(model1.S,1),1);
+model1.boolMetFormulasChange = zeros(size(model1.S,1),1);
 
 %going through each unbalanced reaction tocheck if it can be fixed
 for q = 1:length(i1)
@@ -65,7 +67,9 @@ y2=0;
 z2=0;
 rxnToChange = zeros(size(model2.S,1),1);
 model2.altMetCharge = model2.metCharge;
+model2.boolMetChargeChange = zeros(size(model2.metCharge));
 model2.altMetFormulas = cell(size(model2.S,1),1);
+model2.boolMetFormulasChange = zeros(size(model2.S,1),1);
 
 for q = 1:length(i2)
         rxnToChange = model2.S( :, i2(q,1));

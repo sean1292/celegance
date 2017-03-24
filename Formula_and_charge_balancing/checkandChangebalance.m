@@ -77,10 +77,12 @@ if isequal(totProducts, totReactants) && totCh1==totCh2
        if strcmp(string(model.metFormulas(reactants(k,1), 1)),reactantBigg{k,3})~=1
             formulasChanged = formulasChanged + 1;
             model.altMetFormulas{reactants(k,1), 1} = reactantBigg{k,3};
+            model.boolMetFormulasChange(reactants(k,1), 1) = 1;
        end
        if model.metCharge(reactants(k,1), 1) ~= int32(str2double(reactantBigg{k,2}))
             chargesChanged = chargesChanged + 1;
             model.altMetCharge(reactants(k,1), 1) = int32(str2double(reactantBigg{k,2}));
+            model.boolMetChargeChange(reactants(k,1), 1) = 1;
        end
        
     end
@@ -88,9 +90,11 @@ if isequal(totProducts, totReactants) && totCh1==totCh2
        if strcmp(string(model.metFormulas(products(k,1), 1)),productBigg{k,3})~=1
             formulasChanged = formulasChanged + 1; 
             model.altMetFormulas{products(k,1), 1} = productBigg{k,3};
+            model.boolMetFormulasChange(products(k,1), 1) = 1;
        end
        if model.metCharge(products(k,1), 1) ~= int32(str2double(productBigg{k,2}))
             chargesChanged = chargesChanged + 1;
+            model.boolMetChargeChange(products(k,1), 1) = 1;
             model.altMetCharge(products(k,1), 1) = int32(str2double(productBigg{k,2}));
        end
     end
