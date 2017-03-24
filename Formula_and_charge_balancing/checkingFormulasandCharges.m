@@ -39,7 +39,7 @@ x1=0;
 y1=0;
 z1=0;
 rxnToChange = zeros(size(model1.S,1),1);
-model1.altMetCharge = zeros(size(model1.S,1),1);
+model1.altMetCharge = model1.metCharge;
 model1.altMetFormulas = cell(size(model1.S,1),1);
 
 %going through each unbalanced reaction tocheck if it can be fixed
@@ -52,7 +52,7 @@ for q = 1:length(i1)
 end
 
 fprintf('\n%d Charges were edited in Model 1 ',chargeFixed1);
-fprintf('\n%d Formaulas were edited in Model 1 ',formulaFixed1);
+fprintf('\n%d Formulas were edited in Model 1 ',formulaFixed1);
 fprintf('\n%d Reactions were balanced in Model 1\n',reactionFixed1);
 
 
@@ -64,7 +64,7 @@ x2=0;
 y2=0;
 z2=0;
 rxnToChange = zeros(size(model2.S,1),1);
-model2.altMetCharge = zeros(size(model2.S,1),1);
+model2.altMetCharge = model2.metCharge;
 model2.altMetFormulas = cell(size(model2.S,1),1);
 
 for q = 1:length(i2)
@@ -76,7 +76,7 @@ for q = 1:length(i2)
 end
 
 fprintf('\n%d Charges were edited in Model 2 ',chargeFixed2);
-fprintf('\n%d Formaulas were edited in Model 2 ',formulaFixed2);
+fprintf('\n%d Formulas were edited in Model 2 ',formulaFixed2);
 fprintf('\n%d Reactions were balanced in Model 2\n',reactionFixed2);
 
 
